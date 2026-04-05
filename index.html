@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>Ayan Gallery | ছবি শেয়ার করুন ও দেখুন</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', 'Poppins', system-ui, sans-serif;
+    }
+
+    body {
+      background: linear-gradient(145deg, #f9f5f0 0%, #f0ebe3 100%);
+      min-height: 100vh;
+      padding: 2rem 1.5rem;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .hero {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    .hero h1 {
+      font-size: 3rem;
+      background: linear-gradient(135deg, #b87333, #e4a05e);
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+      font-weight: 700;
+    }
+
+    .hero h1::before {
+      content: "🖼️ ";
+      background: none;
+      color: #b87333;
+    }
+
+    .hero p {
+      color: #5a4a3a;
+      font-size: 1.1rem;
+      margin-top: 0.5rem;
+      background: rgba(255,248,235,0.7);
+      display: inline-block;
+      padding: 0.3rem 1.5rem;
+      border-radius: 60px;
+    }
+
+    /* upload card */
+    .upload-card {
+      background: rgba(255, 255, 255, 0.92);
+      border-radius: 2rem;
+      box-shadow: 0 20px 35px -12px rgba(0,0,0,0.15);
+      padding: 1.8rem 2rem;
+      margin-bottom: 3rem;
+      border: 1px solid rgba(255,245,235,0.8);
+    }
+
+    .upload-area {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      align-items: flex-end;
+      justify-content: center;
+    }
+
+    .file-input-wrapper {
+      flex: 2;
+      min-width: 220px;
+    }
+
+    .file-label {
+      display: block;
+      font-weight: 600;
+      color: #4f3b28;
+      margin-bottom: 0.6rem;
+    }
+
+    .custom-file-input {
+      width: 100%;
+      padding: 0.9rem 1rem;
+      background: #fffaf5;
+      border: 2px dashed #d9c2a6;
+      border-radius: 1.5rem;
+      cursor: pointer;
+      font-weight: 500;
+    }
+
+    .preview-thumb {
+      margin-top: 0.8rem;
+      max-width: 80px;
+      max-height: 80px;
+      border-radius: 16px;
+      object-fit: cover;
+      border: 2px solid #eedcc7;
+      display: none;
+    }
+
+    .upload-btn {
+      background: linear-gradient(100deg, #b87333, #cf8e4a);
+      border: none;
+      padding: 0.8rem 2rem;
+      border-radius: 3rem;
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: white;
+      cursor: pointer;
+      transition: 0.2s;
+      box-shadow: 0 6px 14px rgba(184,115,51,0.3);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .upload-btn:hover {
+      transform: translateY(-2px);
+      background: linear-gradient(100deg, #a55f28, #c07d3e);
+    }
+
+    .message {
+      margin-top: 1rem;
+      padding: 0.5rem 1rem;
+      border-radius: 2rem;
+      text-align: center;
+      background: #efe4d8;
+      color: #4f3b28;
+      font-weight: 500;
+    }
+
+    .gallery-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      flex-wrap: wrap;
+      margin-bottom: 1.5rem;
+      border-bottom: 2px solid #e6d5c0;
+      padding-bottom: 0.7rem;
+    }
+
+    .gallery-header h2 {
+      font-size: 1.9rem;
+      font-weight: 600;
+      background: linear-gradient(125deg, #3e2c1c, #84613f);
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+    }
+
+    .gallery-count {
+      background: #e7d9cb;
+      padding: 0.3rem 1rem;
+      border-radius: 40px;
+      font-weight: 600;
+      color: #5c3f25;
+    }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.8rem;
+      margin-top: 1rem;
+    }
+
+    .gallery-card {
+      background: white;
+      border-radius: 1.5rem;
+      overflow: hidden;
+      box-shadow: 0 12px 24px -12px rgba(0,0,0,0.2);
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .gallery-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 24px 32px -16px rgba(0,0,0,0.25);
+    }
+
+    .card-img {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      object-fit: cover;
+      background: #f3ede7;
+    }
+
+    .card-info {
+      padding: 1rem;
+    }
+
+    .card-info .filename {
+      font-weight: 600;
+      color: #3b2a1e;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .card-info .date {
+      font-size: 0.7rem;
+      color: #9b7b5e;
+      margin-top: 6px;
+    }
+
+    /* lightbox */
+    .lightbox {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.88);
+      backdrop-filter: blur(12px);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      cursor: pointer;
+    }
+
+    .lightbox.active {
+      display: flex;
+    }
+
+    .lightbox-img {
+      max-width: 90vw;
+      max-height: 85vh;
+      object-fit: contain;
+      border-radius: 24px;
+      animation: fadeScale 0.2s ease;
+    }
+
+    @keyframes fadeScale {
+      from { opacity: 0; transform: scale(0.96);}
+      to { opacity: 1; transform: scale(1);}
+    }
+
+    .close-lightbox {
+      position: absolute;
+      top: 25px;
+      right: 35px;
+      font-size: 2.8rem;
+      color: white;
+      background: rgba(0,0,0,0.5);
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .close-lightbox:hover {
+      background: #b87333;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 3rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid #e2cfb9;
+      color: #876e51;
+    }
+
+    .empty-gallery {
+      text-align: center;
+      padding: 3rem;
+      background: #fef6ed;
+      border-radius: 2rem;
+      color: #aa8b6e;
+      font-size: 1.2rem;
+    }
+
+    @media (max-width: 680px) {
+      body { padding: 1.2rem; }
+      .hero h1 { font-size: 2.4rem; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="hero">
+    <h1>Ayan Gallery</h1>
+    <p>📸 ছবি আপলোড করুন · গ্যালারিতে দেখুন · যেকোনো ব্রাউজারে সংরক্ষিত থাকবে</p>
+  </div>
+
+  <div class="upload-card">
+    <div class="upload-area">
+      <div class="file-input-wrapper">
+        <label class="file-label">🖼️ ছবি নির্বাচন করুন (JPG, PNG, GIF, WEBP)</label>
+        <input type="file" id="imageInput" accept="image/jpeg,image/png,image/webp,image/gif" class="custom-file-input">
+        <img id="previewImg" class="preview-thumb" alt="preview">
+      </div>
+      <button id="uploadBtn" class="upload-btn">⬆️ আপলোড করুন</button>
+    </div>
+    <div id="uploadMessage" class="message">✨ ছবি আপলোড করলেই গ্যালারিতে দেখা যাবে ✨</div>
+  </div>
+
+  <div class="gallery-header">
+    <h2>📷 গ্যালারি</h2>
+    <span class="gallery-count" id="galleryCount">০টি ছবি</span>
+  </div>
+  <div id="galleryGrid" class="gallery-grid">
+    <div class="loader" style="text-align:center; padding:2rem;">⏳ লোড হচ্ছে...</div>
+  </div>
+  <footer>
+    🌟 Ayan Gallery — ছবি সংরক্ষিত হয় আপনার ব্রাউজারে (IndexedDB) 🌟
+  </footer>
+</div>
+
+<div id="lightbox" class="lightbox">
+  <span class="close-lightbox">&times;</span>
+  <img class="lightbox-img" id="lightboxImg" alt="বড় করে দেখুন">
+</div>
+
+<script>
+  // ---------- IndexedDB setup (no backend needed) ----------
+  const DB_NAME = 'AyanGalleryDB';
+  const STORE_NAME = 'images';
+  let db = null;
+
+  // Open or create database
+  function openDB() {
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open(DB_NAME, 2);
+      request.onerror = () => reject(request.error);
+      request.onsuccess = () => {
+        db = request.result;
+        resolve(db);
+      };
+      request.onupgradeneeded = (event) => {
+        const dbRef = event.target.result;
+        if (!dbRef.objectStoreNames.contains(STORE_NAME)) {
+          const store = dbRef.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
+          store.createIndex('uploadedAt', 'uploadedAt', { unique: false });
+        }
+      };
+    });
+  }
+
+  // Save image (blob + metadata)
+  async function saveImageToDB(file, dataURL) {
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction([STORE_NAME], 'readwrite');
+      const store = transaction.objectStore(STORE_NAME);
+      const imageData = {
+        originalName: file.name,
+        type: file.type,
+        size: file.size,
+        dataURL: dataURL,          // store as base64 for easy display & persistence
+        uploadedAt: new Date().toISOString()
+      };
+      const request = store.add(imageData);
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  // Get all images from DB
+  async function getAllImages() {
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction([STORE_NAME], 'readonly');
+      const store = transaction.objectStore(STORE_NAME);
+      const index = store.index('uploadedAt');
+      const request = index.openCursor(null, 'prev'); // newest first
+      const images = [];
+      request.onsuccess = (event) => {
+        const cursor = event.target.result;
+        if (cursor) {
+          images.push(cursor.value);
+          cursor.continue();
+        } else {
+          resolve(images);
+        }
+      };
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  // Delete image by id (if needed later, but keeping optional)
+  async function deleteImageById(id) {
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction([STORE_NAME], 'readwrite');
+      const store = transaction.objectStore(STORE_NAME);
+      const request = store.delete(id);
+      request.onsuccess = () => resolve();
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  // Render gallery from DB
+  async function renderGallery() {
+    if (!db) return;
+    const images = await getAllImages();
+    const galleryGrid = document.getElementById('galleryGrid');
+    const countSpan = document.getElementById('galleryCount');
+    
+    if (images.length === 0) {
+      galleryGrid.innerHTML = `<div class="empty-gallery">✨ এখনো কোনো ছবি আপলোড হয়নি। প্রথম ছবিটি আপলোড করুন! ✨</div>`;
+      countSpan.innerText = `০টি ছবি`;
+      return;
+    }
+    
+    countSpan.innerText = `${images.length}টি ${images.length === 1 ? 'ছবি' : 'ছবি'}`;
+    const gridHtml = images.map(img => {
+      const dateObj = new Date(img.uploadedAt);
+      const dateStr = isNaN(dateObj.getTime()) ? 'সাম্প্রতিক' : dateObj.toLocaleDateString('bn-BD', { day: 'numeric', month: 'short', hour: '2-digit', minute:'2-digit' });
+      const shortName = img.originalName.length > 28 ? img.originalName.substring(0, 25) + '…' : img.originalName;
+      return `
+        <div class="gallery-card" data-id="${img.id}" data-url="${img.dataURL}">
+          <img class="card-img" src="${img.dataURL}" alt="${escapeHtml(img.originalName)}" loading="lazy">
+          <div class="card-info">
+            <div class="filename">📎 ${escapeHtml(shortName)}</div>
+            <div class="date">🕒 ${dateStr}</div>
+          </div>
+        </div>
+      `;
+    }).join('');
+    galleryGrid.innerHTML = gridHtml;
+    
+    // Attach lightbox click event
+    document.querySelectorAll('.gallery-card').forEach(card => {
+      card.addEventListener('click', (e) => {
+        const url = card.getAttribute('data-url');
+        if (url) {
+          document.getElementById('lightboxImg').src = url;
+          document.getElementById('lightbox').classList.add('active');
+        }
+      });
+    });
+  }
+
+  // upload handler with file -> dataURL -> save to DB
+  async function handleUpload(file) {
+    if (!file) {
+      showMessage('❗ দয়া করে একটি ছবি নির্বাচন করুন', true);
+      return false;
+    }
+    if (!file.type.startsWith('image/')) {
+      showMessage('❌ শুধুমাত্র ছবির ফাইল অনুমোদিত (JPEG, PNG, GIF, WEBP)', true);
+      return false;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      showMessage('⚠️ ছবির সাইজ ১০ এমবি-এর কম হতে হবে', true);
+      return false;
+    }
+    
+    showMessage('⏳ আপলোড হচ্ছে এবং সংরক্ষণ করা হচ্ছে...');
+    try {
+      // Convert file to dataURL for storage
+      const dataURL = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+      await saveImageToDB(file, dataURL);
+      showMessage('✅ ছবি সফলভাবে আপলোড হয়েছে! গ্যালারি আপডেট হচ্ছে...');
+      // refresh gallery
+      await renderGallery();
+      // clear preview & input
+      document.getElementById('imageInput').value = '';
+      document.getElementById('previewImg').style.display = 'none';
+      document.getElementById('previewImg').src = '';
+      return true;
+    } catch (err) {
+      console.error(err);
+      showMessage(`❌ আপলোড ব্যর্থ: ${err.message}`, true);
+      return false;
+    }
+  }
+  
+  function showMessage(text, isError = false) {
+    const msgDiv = document.getElementById('uploadMessage');
+    msgDiv.textContent = text;
+    msgDiv.style.background = isError ? '#ffe0db' : '#e1f0e8';
+    msgDiv.style.color = isError ? '#b13e2d' : '#2b6e47';
+    setTimeout(() => {
+      if (document.getElementById('uploadMessage').textContent === text) {
+        msgDiv.style.background = '#efe4d8';
+        msgDiv.style.color = '#4f3b28';
+        msgDiv.textContent = '✨ ছবি আপলোড করলেই গ্যালারিতে দেখা যাবে ✨';
+      }
+    }, 3500);
+  }
+  
+  function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/[&<>]/g, function(m) {
+      if (m === '&') return '&amp;';
+      if (m === '<') return '&lt;';
+      if (m === '>') return '&gt;';
+      return m;
+    });
+  }
+  
+  // ---------- Event Listeners & Initialization ----------
+  window.addEventListener('DOMContentLoaded', async () => {
+    try {
+      await openDB();
+      await renderGallery();
+    } catch (err) {
+      console.error('IndexedDB error', err);
+      document.getElementById('galleryGrid').innerHTML = `<div class="empty-gallery">⚠️ আপনার ব্রাউজার IndexedDB সমর্থন করে না অথবা ডাটাবেস খোলা যায়নি।</div>`;
+    }
+    
+    // preview image
+    const imgInput = document.getElementById('imageInput');
+    const preview = document.getElementById('previewImg');
+    imgInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file && file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          preview.src = ev.target.result;
+          preview.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+      } else {
+        preview.style.display = 'none';
+      }
+    });
+    
+    document.getElementById('uploadBtn').addEventListener('click', () => {
+      const file = document.getElementById('imageInput').files[0];
+      if (file) handleUpload(file);
+      else showMessage('❗ প্রথমে একটি ছবি নির্বাচন করুন', true);
+    });
+    
+    // lightbox close
+    const lightbox = document.getElementById('lightbox');
+    const closeBtn = document.querySelector('.close-lightbox');
+    const lightboxImg = document.getElementById('lightboxImg');
+    closeBtn.addEventListener('click', () => {
+      lightbox.classList.remove('active');
+      lightboxImg.src = '';
+    });
+    lightbox.addEventListener('click', (e) => {
+      if (e.target === lightbox) {
+        lightbox.classList.remove('active');
+        lightboxImg.src = '';
+      }
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && lightbox.classList.contains('active')) {
+        lightbox.classList.remove('active');
+        lightboxImg.src = '';
+      }
+    });
+  });
+</script>
+</body>
+</html>
